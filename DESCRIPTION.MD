@@ -21,7 +21,9 @@ Kode ini dibangun dari **5 lapisan utama** yang saling terhubung:
 #define AP_SSID "Redzskid_Lab"
 #define AP_PASS "HackThePlanet!"
 #define LED_PIN 2
-#define SCRIPT_FILE "/scripts.txt"```
+#define SCRIPT_FILE "/scripts.txt" 
+```markdown
+
 Semua library yang dipakai adalah bawaan ESP32 core — gak perlu tambahan eksternal.
 AP_SSID dan AP_PASS bikin ESP32 jadi hotspot sendiri.
 LED_PIN 2 dipilih karena itu built-in LED di kebanyakan ESP32 DevKit V1.
@@ -33,3 +35,7 @@ WebServer server(80);
 String currentFakeSSID = "";
 bool evilTwinActive = false;
 String logBuffer = "";
+```markdown
+WebServer server(80) bikin ESP32 jadi web server beneran di port 80.
+Variabel global dipakai buat simpan status runtime: apakah Evil Twin aktif, SSID-nya apa, dan log aktivitas terkini.
+##
