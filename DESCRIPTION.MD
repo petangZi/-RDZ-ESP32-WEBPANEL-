@@ -1,147 +1,140 @@
-// ===================================================================================================
-// ESP32 Real Hack Lab v4.0 - Deep Dive Kode (Description.md)
-// ===================================================================================================
-//
-// Bayangin punya lab hacking mini yang bisa dibawa ke mana aja — cuma modal ESP32, breadboard, dan HP.
-// Itu yang gue bangun di sini. Tapi ini bukan cuma “tampilan keren”. Setiap baris kode dirancang supaya
-// semua fitur benar-benar jalan, offline, dan legal — karena semuanya cuma berjalan di jaringan lokal 
-// yang dibuat oleh ESP32 sendiri (192.168.4.x).
-//
-// ===================================================================================================
-// 1. Include & Definisi
-// ===================================================================================================
-// Semua library yang dipakai adalah bawaan ESP32 core — gak perlu tambahan eksternal.
-// AP_SSID dan AP_PASS bikin ESP32 jadi hotspot sendiri.
-// LED_PIN 2 dipilih karena itu built-in LED di kebanyakan ESP32 DevKit V1.
-// SCRIPT_FILE adalah path file di SPIFFS — sistem file internal ESP32.
-//
-// #include <WiFi.h>
-// #include <WebServer.h>
-// #include <WiFiClient.h>
-// #include <FS.h>
-// #include <SPIFFS.h>
-//
-// #define AP_SSID "Redzskid_Lab"
-// #define AP_PASS "HackThePlanet!"
-// #define LED_PIN 2
-// #define SCRIPT_FILE "/scripts.txt"
-//
-// ===================================================================================================
-// 2. Global State
-// ===================================================================================================
-// WebServer server(80) bikin ESP32 jadi web server beneran di port 80.
-// Variabel global dipakai buat simpan status runtime: apakah Evil Twin aktif, SSID-nya apa, dan log aktivitas terkini.
-//
-// WebServer server(80);
-// String currentFakeSSID = "";
-// bool evilTwinActive = false;
-// String logBuffer = "";
-//
-// ===================================================================================================
-// 3. Fungsi Bantuan (Utility Layer)
-// ===================================================================================================
-// saveScript() nyimpen script ke file SPIFFS dalam mode append — jadi script lama gak ilang.
-// addLog() nyimpen riwayat aktivitas dengan batas 1000 karakter biar gak memory leak.
-// initSpiffs() inisialisasi sistem file internal ESP32.
-// loadScripts() membaca semua script dari file dan mengembalikannya dalam format HTML yang aman.
-//
-// void saveScript(String script) {
-//   File file = SPIFFS.open(SCRIPT_FILE, "a");
-//   file.println(script);
-//   file.close();
-// }
-//
-// void addLog(String msg) {
-//   logBuffer = "> " + msg + "\n" + logBuffer;
-//   if (logBuffer.length() > 1000) logBuffer = logBuffer.substring(0, 1000);
-// }
-//
-// void initSpiffs() {
-//   if (!SPIFFS.begin(true)) {
-//     Serial.println("❌ SPIFFS Mount Failed");
-//     return;
-//   }
-//   Serial.println("✅ SPIFFS Ready");
-// }
-//
-// String loadScripts() {
-//   if (!SPIFFS.exists(SCRIPT_FILE)) return "<i>Belum ada script.</i>";
-//   
-//   File file = SPIFFS.open(SCRIPT_FILE, "r");
-//   String content = "";
-//   while (file.available()) {
-//     String line = file.readStringUntil('\n');
-//     line.trim();
-//     if (line.length() > 0) {
-//       line.replace("<", "<");
-//       line.replace(">", ">");
-//       content = "<div style='padding:4px;border-bottom:1px solid #00331a;'>• " + line + "</div>" + content;
-//     }
-//   }
-//   file.close();
-//   return content == "" ? "<i>Belum ada script.</i>" : content;
-// }
-//
-// ===================================================================================================
-// 4. Web UI – HTML dalam Flash
-// ===================================================================================================
-// HTML UI disimpan langsung di flash memory pake PROGMEM dan R"rawliteral(...)" — hemat RAM.
-// Desainnya dark mode, responsif, dan interaktif — kayak tools beneran, bukan demo murahan.
-//
-// const char MAIN_PAGE[] PROGMEM = R"rawliteral(
-// <!DOCTYPE html>
-// ...
-// )rawliteral";
-//
-// ===================================================================================================
-// 5. Handler – Otak Operasional
-// ===================================================================================================
-// Setiap tombol di web punya handler spesifik:
-// - /led/on → digitalWrite(LED_PIN, HIGH) → LED di breadboard nyala.
-// - /scan_area → loop dari 192.168.4.1 sampai .10, coba koneksi ke port 80/8080.
-// - /port_scan → coba 8 port umum (80, 22, 21, dll) pake WiFiClient.connect().
-// - /dos → kirim 100 request HTTP GET ke target lokal.
-// - /fuzz → lempar 7 payload keamanan (XSS, path traversal, SQLi) ke endpoint /.
-// - /evil_twin → WiFi.softAP(ssid, "12345678") → bikin fake hotspot.
-// - /deauth → matikan AP sebentar, lalu nyalain lagi → simulasi disconnect client.
-// - /exec → eksekusi command (misal led on) dan simpan ke SPIFFS.
-//
-// void handleLedOn() { digitalWrite(LED_PIN, HIGH); ... }
-// void handleScanArea() { ... }
-// void handlePortScan() { ... }
-// void handleDoS() { ... }
-// void handleFuzz() { ... }
-// void handleEvilTwin() { ... }
-// void handleDeauth() { ... }
-// void handleExec() { ... }
-// void handleScripts() { ... }
-//
-// ===================================================================================================
-// ⚡ Cara Kerja Nyata (Bukan Simulasi)
-// ===================================================================================================
-// - DoS Attack: Bukan cuma tampilin teks. ESP32 benar-benar kirim 100 request HTTP ke target lokal.
-// - Port Scanner: Bukan daftar statis. ESP32 coba koneksi TCP beneran ke setiap port.
-// - Evil Twin: Bukan ilusi. ESP32 beneran jadi access point dengan SSID bebas.
-// - Script Storage: Data disimpan di flash internal via SPIFFS. Bahkan setelah ESP32 direstart, semua script tetap ada.
-//
-// ===================================================================================================
-// 🛡️ Legal & Etika
-// ===================================================================================================
-// Semua fitur dibatasi hanya untuk jaringan lokal:
-// - Target IP harus dimulai dengan 192.168.4. → artinya cuma bisa nyerang perangkat yang sengaja lu sambungin ke hotspot ESP32.
-// - Tidak ada koneksi ke internet.
-// - Tidak ada scanning di luar subnet lokal.
-//
-// Ini bukan alat buat nyerang — tapi alat edukasi buat ngerti cara kerja serangan, supaya bisa dipertahankan.
-//
-// ===================================================================================================
-// 💡 Kenapa Ini Beda?
-// ===================================================================================================
-// - Bukan demo: Semua fitur nyata, tapi dikurung di lingkungan aman.
-// - Portabel: Cuma butuh power bank + HP buat demo.
-// - Self-contained: Gak butuh laptop, internet, atau server eksternal.
-// - White hat by design: Dibangun dari prinsip ethical hacking sejak awal.
-//
-// Dibikin buat tugas informatika, tapi levelnya udah kayak proyek cybersecurity beneran. Cocok buat demo ke guru, ikut lomba, atau jadi fondasi eksperimen lanjutan.
-//
-// Hack smart. Stay legal. Dan tetap jadi white hat.
+# ESP32 Real Hack Lab v4.0 🛡️
+
+Sebuah laboratorium hacking mini yang portabel dan edukatif, dibangun di atas ESP32. Proyek ini dirancang untuk demonstrasi dan pembelajaran keamanan siber secara etis dalam lingkungan jaringan lokal yang terisolasi.
+
+![ESP32](https://img.shields.io/badge/Platform-ESP32-000000?style=for-the-badge&logo=espressif)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+
+## Daftar Isi
+
+- [Fitur Utama](#fitur-utama)
+- [Kebutuhan](#kebutuhan)
+  - [Hardware](#hardware)
+  - [Software](#software)
+- [Instalasi & Setup](#instalasi--setup)
+- [Cara Penggunaan](#cara-penggunaan)
+- [Struktur Kode](#struktur-kode)
+- [⚠️ Pertimbangan Etis & Legal](#️-pertimbangan-ethis--legal)
+- [Kontribusi](#kontribusi)
+- [Lisensi](#lisensi)
+- [Kredit](#kredit)
+
+---
+
+## Fitur Utama
+
+Proyek ini bukan sekadar simulasi; setiap fitur diimplementasikan untuk berfungsi nyata dalam batasan jaringan lokal.
+
+- 💡 **Kontrol LED**: Nyalakan dan matikan LED pada breadboard secara langsung dari antarmuka web.
+- 📡 **Network Scanner**: Pindai perangkat yang terhubung pada jaringan lokal (192.168.4.x).
+- 🔓 **Port Scanner**: Periksa port umum (seperti 80, 22, 443) pada target di jaringan lokal.
+- 💥 **Denial of Service (DoS)**: Kirim sejumlah request HTTP ke target lokal untuk mensimulasikan serangan DoS.
+- 🧪 **Web Fuzzer**: Uji keamanan web server lokal dengan berbagai payload (XSS, SQL Injection, Path Traversal).
+- 🎭 **Evil Twin Attack**: Buat Access Point (AP) tiruan dengan SSID yang dapat disesuaikan.
+- ✋ **Deauth Simulation**: Putuskan sementara koneksi client dari AP Evil Twin.
+- 📜 **Script Executor & Storage**: Simpan, eksekusi, dan kelola serangkaian perintah yang tersimpan di memori flash ESP32 (SPIFFS).
+- 📊 **Activity Log**: Pantau semua aktivitas dan hasil serangan secara real-time melalui log pada antarmuka web.
+
+## Kebutuhan
+
+### Hardware
+
+- ESP32 DevKit V1 (atau varian lain dengan built-in LED di pin 2).
+- Breadboard.
+- Kabel Jumper.
+- LED (opsional, jika tidak menggunakan built-in LED).
+- Power Bank atau kabel USB untuk daya.
+- Smartphone atau laptop dengan browser web.
+
+### Software
+
+- [Arduino IDE](https://www.arduino.cc/en/software) dengan ESP32 Board Manager terinstal.
+- Library yang digunakan adalah library bawaan ESP32 core:
+  - `WiFi.h`
+  - `WebServer.h`
+  - `FS.h`
+  - `SPIFFS.h`
+
+## Instalasi & Setup
+
+1.  **Clone Repository**
+    ```bash
+    git clone https://github.com/username/esp32-real-hack-lab.git
+    cd esp32-real-hack-lab
+    ```
+
+2.  **Setup Hardware**
+    - Jika menggunakan LED eksternal, hubungkan kaki positif (+) ke pin `D2` (GPIO 2) dan kaki negatif (-) ke resistor (220-330 Ohm) lalu ke GND.
+    - Jika tidak, Anda dapat menggunakan built-in LED di board ESP32.
+
+3.  **Buka di Arduino IDE**
+    - Buka file `.ino` proyek ini di Arduino IDE.
+    - Pastikan board yang dipilih adalah "ESP32 Dev Module" (atau yang sesuai) dan port COM terdeteksi dengan benar.
+
+4.  **Upload Kode**
+    - Klik tombol `Upload` untuk mem-flash kode ke ESP32.
+    - Buka Serial Monitor (baud rate 115200) untuk melihat pesan status, seperti "✅ SPIFFS Ready" dan "✅ AP Started".
+
+5.  **Hubungkan ke Access Point**
+    - Di smartphone atau laptop Anda, cari dan sambungkan ke jaringan Wi-Fi bernama `Redzskid_Lab` dengan password `HackThePlanet!`.
+
+6.  **Akses Antarmuka Web**
+    - Buka browser web dan kunjungi alamat `http://192.168.4.1`.
+    - Anda akan melihat antarmuka kontrol Real Hack Lab.
+
+## Cara Penggunaan
+
+Semua fitur dapat diakses melalui antarmuka web yang telah disediakan.
+
+- **LED Control**: Klik tombol "LED ON" atau "LED OFF" untuk mengontrol LED.
+- **Scanning**: Masukkan IP target (misalnya `192.168.4.2`) dan gunakan tombol "Scan Area" atau "Port Scan" untuk memulai pemindaian.
+- **Attacks**:
+  - **DoS**: Masukkan IP target dan klik "Launch DoS" untuk mengirim 100 request.
+  - **Fuzz**: Masukkan IP target dan klik "Start Fuzzing" untuk menguji endpoint dengan payload berbahaya.
+- **Evil Twin**:
+  - Masukkan SSID palsu yang diinginkan di kolom input.
+  - Klik "Start Evil Twin" untuk membuat AP baru. ESP32 akan restart dengan SSID baru.
+  - Untuk menghentikannya, klik "Stop Evil Twin".
+- **Scripting**:
+  - Ketik perintah (misalnya `led on`) di kolom "Execute Command" dan klik "Execute". Perintah akan dijalankan dan disimpan.
+  - Lihat semua script yang tersimpan di bagian "Saved Scripts".
+
+## Struktur Kode
+
+Kode diorganisir dengan baik untuk memudahkan pemahaman dan pengembangan.
+
+1.  **Include & Definisi**: Bagian atas berisi semua library yang diperlukan dan definisi konstanta seperti `AP_SSID`, `LED_PIN`, dan `SCRIPT_FILE`.
+2.  **Global State**: Inisialisasi objek `WebServer` dan variabel global untuk menyimpan status runtime (status Evil Twin, log, dll.).
+3.  **Fungsi Bantuan (Utility Layer)**: Fungsi-fungsi reusable seperti `saveScript()` untuk menyimpan ke SPIFFS, `addLog()` untuk menambahkan pesan ke log, dan `loadScripts()` untuk membaca script yang tersimpan.
+4.  **Web UI**: Antarmuka HTML, CSS, dan JavaScript disimpan dalam `PROGMEM` untuk menghemat RAM. UI dirancang dengan tema gelap dan responsif.
+5.  **Handler**: Fungsi-fungsi yang dipanggil saat ada request ke endpoint tertentu (misalnya `/led/on`, `/scan_area`, `/evil_twin`). Ini adalah "otak" dari operasional web server.
+
+## ⚠️ Pertimbangan Etis & Legal
+
+Proyek ini **HANYA** ditujukan untuk tujuan **edukasi dan pembelajaran keamanan siber secara etis**.
+
+- **LINGKUNGAN TERISOLASI**: Semua fitur dan serangan dibatasi untuk berjalan **hanya di jaringan lokal (192.168.4.x)** yang dibuat oleh ESP32 itu sendiri.
+- **TIDAK ADA KONEKSI INTERNET**: ESP32 tidak terhubung ke internet, mencegah penyalahgunaan untuk menyerang target di luar jaringan lokal.
+- **TANGGUNG JAWAB PENGGUNA**: Anda bertanggung jawab penuh atas penggunaan alat ini. **Penulis tidak bertanggung jawab atas penyalahgunaan proyek ini untuk tindakan ilegal atau yang melanggar hukum.** Gunakan hanya pada perangkat yang Anda miliki izin untuk uji coba.
+
+## Kontribusi
+
+Kontribusi Anda sangat dihargai! Jika Anda memiliki ide untuk fitur baru atau menemukan bug, silakan buat *issue* atau kirim *pull request*.
+
+1.  Fork proyek ini.
+2.  Buat branch fitur baru (`git checkout -b fitur/BaruSekali`).
+3.  Commit perubahan Anda (`git commit -am 'Menambah fitur X'`).
+4.  Push ke branch (`git push origin fitur/BaruSekali`).
+5.  Buat Pull Request.
+
+## Lisensi
+
+Proyek ini dilisensikan under **MIT License** - lihat file [LICENSE](LICENSE) untuk detailnya.
+
+## Kredit
+
+Proyek ini dibuat oleh **Redzskid** sebagai proyek edukasi dalam bidang keamanan siber dan pengembangan embedded systems.
+
+---
+
+**Hack smart. Stay legal. Tetap menjadi white hat.**
