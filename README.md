@@ -42,4 +42,4 @@
 
 ## 🛠️ Cara Pasang
 
-### 1. Rangkai Hardware
+##malassss
