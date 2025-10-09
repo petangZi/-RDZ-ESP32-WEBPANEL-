@@ -59,8 +59,8 @@ Proyek ini bukan sekadar simulasi; setiap fitur diimplementasikan untuk berfungs
 
 1.  **Clone Repository**
     ```bash
-    git clone https://github.com/username/esp32-real-hack-lab.git
-    cd esp32-real-hack-lab
+    https://github.com/petangZi/-RDZ-ESP32-WEBPANEL-.git
+    cd -RDZ-ESP32-WEBPANEL-
     ```
 
 2.  **Setup Hardware**
