@@ -24,8 +24,6 @@ Dashboard IoT eksklusif yang dirancang untuk kontrol node cerdas. Dibangun di at
 ### 🔌 HARDWARE ARCHITECTURE
 Visualisasi jalur kabel untuk **ESP32 30-Pin** dan **LED RGB Common Cathode**.
 
-
-
 ```mermaid
 graph TD
     subgraph ESP32_Controller
@@ -40,7 +38,7 @@ graph TD
 
     style A fill:#111,stroke:#3b82f6,stroke-width:2px
     style C fill:#111,stroke:#ef4444,stroke-width:2px
-
+```
 ⚠️ PIN CALIBRATION
 Untuk menjaga stabilitas sistem saat booting, gunakan pemetaan pin berikut:
  * ✅ Authorized Pins: 4, 5, 13, 14, 16, 17, 25, 26, 27
