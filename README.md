@@ -25,6 +25,8 @@ Dashboard IoT eksklusif yang dirancang untuk kontrol node cerdas. Dibangun di at
 Visualisasi jalur kabel untuk **ESP32 30-Pin** dan **LED RGB Common Cathode**.
 
 
+
+```mermaid
 graph TD
     subgraph ESP32_Controller
     A[GPIO 4,5,13,14,16,17] -->|Data| B(Normal LEDs)
