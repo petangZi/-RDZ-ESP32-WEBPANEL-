@@ -53,3 +53,4 @@ Untuk menjaga stabilitas sistem saat booting, gunakan pemetaan pin berikut:
 <p><i>Developed by <b>Azuya</b> // Powered by <b>Tuatha Dé</b></i></p>
 <code>SYSTEM STATUS: OPERATIONAL [100%]</code>
 </div>
+
