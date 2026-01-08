@@ -48,7 +48,7 @@ Untuk menjaga stabilitas sistem saat booting, gunakan pemetaan pin berikut:
  * Uplink: Hubungkan ke WiFi SSID TUATHA_DE_NODE.
  * Authorization: Masuk ke dashboard via captive portal dengan passkey redzNotDev.
 <div align="center">
-<p><i>Developed by <b>Azuya</b> // Powered by <b>Tuatha Dé</b></i></p>
+<p><i>Developed by <b>Azuya/redzskid</b> // Powered by <b>Tuatha Dé</b></i></p>
 <code>SYSTEM STATUS: OPERATIONAL [100%]</code>
 </div>
 
