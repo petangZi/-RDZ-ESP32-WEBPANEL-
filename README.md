@@ -1,58 +1,53 @@
-# ⚡ TUATHA DÉ | NODE INTERFACE v2.0
-**Author:** Azuya (Stage Name: Tuatha Dé / redzskid)  
-**Status:** God Mode Calibrated  
-**Hardware:** ESP32 DevKit V1 (30 Pins)
+# <img src="https://iili.io/feXGnBj.md.png" width="40" vertical-align="middle" /> TUATHA DÉ | COMMAND CENTER v2.0
+
+<div align="left">
+  <img src="https://img.shields.io/badge/Status-GOD_MODE-blue?style=for-the-badge&logo=espressif&logoColor=white" />
+  <img src="https://img.shields.io/badge/Security-ENCRYPTED-red?style=for-the-badge&logo=target&logoColor=white" />
+  <img src="https://img.shields.io/badge/UX-PREMIUM-gold?style=for-the-badge&logo=air-force&logoColor=white" />
+</div>
 
 ---
 
-## 🛠 Project Overview
-Sistem kontrol lampu cerdas (IoT) berbasis ESP32 yang mengintegrasikan dashboard web premium dengan fitur keamanan **Auth-Wipe Sequence**. Sistem ini dirancang untuk mengontrol LED standar dan LED RGB Common Cathode melalui protokol HTTP Async.
+### 🌑 OVERVIEW
+Dashboard IoT eksklusif yang dirancang untuk kontrol node cerdas. Dibangun di atas **ESP32 DevKit V1** dengan fokus pada estetika visual dan stabilitas sistem *non-blocking*.
 
-## 🚀 Key Features
-* **Encrypted Access:** Proteksi password sebelum masuk ke dashboard.
-* **Wipe Animation:** Efek transisi sistem bergaya terminal hacker.
-* **Live Pulse Monitor:** Visualisasi aktivitas sistem secara real-time.
-* **8+ Sequence Modes:** Termasuk Chaos, Rain, Breath, dan Wave.
-* **RGB Engine:** Menggunakan PWM (LEDC) untuk transisi warna yang smooth (Bukan On/Off biasa).
-* **Captive Portal:** Otomatis membuka dashboard saat terhubung ke WiFi tanpa ketik IP.
-
-## 🔌 Pin Mapping (ESP32 DevKit V1)
-
-| Component | Pin (GPIO) | Notes |
-|-----------|-----------|-------|
-| LED 1 | 4 | Normal Pin |
-| LED 2 | 5 | Normal Pin |
-| LED 3 | 13 | Normal Pin |
-| LED 4 | 14 | Normal Pin |
-| LED 5 | 16 | Normal Pin |
-| LED 6 | 17 | Normal Pin |
-| **RGB RED** | **25** | **PWM Channel 0** |
-| **RGB GREEN**| **26** | **PWM Channel 1** |
-| **RGB BLUE** | **27** | **PWM Channel 2** |
-
-> **Warning:** Jangan menggunakan GPIO 2 atau 12 untuk menghindari boot-failure pada ESP32.
-
-## ⚙️ Installation
-1.  Buka file `.ino` di Arduino IDE.
-2.  Install library berikut melalui Library Manager:
-    * `ESPAsyncWebServer`
-    * `AsyncTCP`
-3.  Pilih board **DOIT ESP32 DEVKIT V1**.
-4.  Klik **Upload**.
-
-## 📱 How to Use
-1.  Nyalakan ESP32.
-2.  Cari WiFi bernama `TUATHA_DE_NODE` di HP/Laptop lo.
-3.  Konek (Tanpa password WiFi).
-4.  Tunggu pop-up muncul atau buka browser ke `192.168.4.1`.
-5.  Masukkan Passkey: `redzNotDev`.
-6.  **Enjoy God Mode.**
+### 🕹️ CORE COMMANDS
+| Sequence | Logic Description | Vibe |
+| :--- | :--- | :--- |
+| **CHAOS** | Neural random glitch pattern | ⚡ Glitchy |
+| **RAIN** | Sequential node drop-down | 🌧️ Smooth |
+| **BREATH** | Exponential PWM fading curve | 🧬 Biological |
+| **WAVE** | RGB Phase-shift color flow | 🌊 Fluid |
 
 ---
 
-## 📜 Dev Notes
-- **Non-Blocking Logic:** Menggunakan `millis()` untuk memastikan UI tetap responsif saat animasi berjalan.
-- **Safety Whitelist:** Endpoint `/update` telah diproteksi agar tidak bisa memanipulasi pin sistem yang sensitif.
-- **Visuals:** UI menggunakan font 'Inter' dan skema warna Deep Space (Tailwind Palette).
+### 🔌 HARDWARE ARCHITECTURE
+Visualisasi jalur kabel untuk **ESP32 30-Pin** dan **LED RGB Common Cathode**.
 
-"THIS IS NOT A TOY PROJECT"
+
+graph TD
+    subgraph ESP32_Controller
+    A[GPIO 4,5,13,14,16,17] -->|Data| B(Normal LEDs)
+    C[GPIO 25, 26, 27] -->|PWM| D(RGB LED Special)
+    end
+    
+    subgraph LED_Power
+    B --> E[GND]
+    D --> E
+    end
+
+    style A fill:#111,stroke:#3b82f6,stroke-width:2px
+    style C fill:#111,stroke:#ef4444,stroke-width:2px
+
+⚠️ PIN CALIBRATION
+Untuk menjaga stabilitas sistem saat booting, gunakan pemetaan pin berikut:
+ * ✅ Authorized Pins: 4, 5, 13, 14, 16, 17, 25, 26, 27
+ * ❌ Restricted Pins: 2, 12 (Dilarang guna untuk menghindari boot-loop)
+🚀 DEPLOYMENT PROTOCOL
+ * Flash Code: Gunakan file .ino yang sudah dioptimasi untuk ESP32.
+ * Uplink: Hubungkan ke WiFi SSID TUATHA_DE_NODE.
+ * Authorization: Masuk ke dashboard via captive portal dengan passkey redzNotDev.
+<div align="center">
+<p><i>Developed by <b>Azuya</b> // Powered by <b>Tuatha Dé</b></i></p>
+<code>SYSTEM STATUS: OPERATIONAL [100%]</code>
+</div>
